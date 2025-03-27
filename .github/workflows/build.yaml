@@ -33,7 +33,7 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          if echo "$CHANGED_FILES" | grep '^helm/app/s' > /dev/null; then
+          if echo "$CHANGED_FILES" | grep '^helm/apps' > /dev/null; then
             echo "Helm chart changes detected!"
             echo "helm_changed=true" >> $GITHUB_ENV
             echo "helm_changed=true" >> $GITHUB_OUTPUT
