@@ -1,0 +1,75 @@
+name: Helm Package
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-helm-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      helm_changed: ${{ steps.check_changes.outputs.helm_changed }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Ensure we have at least the previous commit
+
+      - name: Debug Git Log
+        run: |
+          echo "Showing last 2 commits:"
+          git log -2 --oneline
+
+      - name: Check for Helm Chart Changes
+        id: check_changes
+        run: |
+          echo "Checking for changes in helm-chart directory..."
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep '^helm/' > /dev/null; then
+            echo "Helm chart changes detected!"
+            echo "helm_changed=true" >> $GITHUB_ENV
+            echo "helm_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No Helm chart changes detected."
+            echo "helm_changed=false" >> $GITHUB_ENV
+            echo "helm_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Print Helm Changed Value
+        run: |
+          echo "Helm changed: ${{ steps.check_changes.outputs.helm_changed }}"
+          echo "Helm changed (ENV): ${{ env.helm_changed }}"
+
+  # package-helm:
+  #   needs: check-helm-changes
+  #   if: needs.check-helm-changes.outputs.helm_changed == 'true'
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Install Helm
+  #       uses: azure/setup-helm@v4
+  #       with:
+  #         version: latest
+
+  #     - name: Package Helm Chart
+  #       run: |
+  #         mkdir -p packaged
+  #         helm package helm-chart -d packaged
+  #         echo "Helm chart packaged successfully!"
+
+  #     - name: Upload Helm Package Artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: helm-chart
+  #         path: packaged/
