@@ -55,7 +55,7 @@ jobs:
 
   package-helm:
     needs: check-helm-changes
-    # if: needs.check-helm-changes.outputs.helm_changed == 'true' && github.ref == 'refs/heads/main'
+    if: needs.check-helm-changes.outputs.helm_changed == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
