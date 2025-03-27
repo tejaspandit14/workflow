@@ -18,22 +18,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Ensure we have at least the previous commit
+          fetch-depth: 0  # Ensure full commit history for accurate diff
 
       - name: Debug Git Log
         run: |
-          echo "Showing last 2 commits:"
-          git log -2 --oneline
+          echo "Showing last 5 commits:"
+          git log -5 --oneline
 
       - name: Check for Helm Chart Changes
         id: check_changes
         run: |
-          echo "Checking for changes in helm-chart directory..."
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Finding the last common ancestor..."
+          BASE_COMMIT=$(git merge-base origin/main HEAD)
+          echo "Last common commit: $BASE_COMMIT"
+
+          echo "Checking for changes in helm/app/ directory..."
+          CHANGED_FILES=$(git diff --name-only $BASE_COMMIT HEAD)
+
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          if echo "$CHANGED_FILES" | grep '^helm/' > /dev/null; then
+          if echo "$CHANGED_FILES" | grep -q '^helm/app/'; then
             echo "Helm chart changes detected!"
             echo "helm_changed=true" >> $GITHUB_ENV
             echo "helm_changed=true" >> $GITHUB_OUTPUT
@@ -43,14 +48,14 @@ jobs:
             echo "helm_changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Print Helm Changed Value
+      - name: Print Helm Changed Value (Debug)
         run: |
           echo "Helm changed: ${{ steps.check_changes.outputs.helm_changed }}"
           echo "Helm changed (ENV): ${{ env.helm_changed }}"
 
   # package-helm:
   #   needs: check-helm-changes
-  #   if: needs.check-helm-changes.outputs.helm_changed == 'true'
+  #   if: needs.check-helm-changes.outputs.helm_changed == 'true' && github.ref == 'refs/heads/main'
   #   runs-on: ubuntu-latest
 
   #   steps:
@@ -65,7 +70,7 @@ jobs:
   #     - name: Package Helm Chart
   #       run: |
   #         mkdir -p packaged
-  #         helm package helm-chart -d packaged
+  #         helm package helm/app -d packaged
   #         echo "Helm chart packaged successfully!"
 
   #     - name: Upload Helm Package Artifact
