@@ -11,8 +11,8 @@ on:
 jobs:
   check-helm-changes:
     runs-on: ubuntu-latest
-    # outputs:
-    #   helm_changed: ${{ steps.check_changes.outputs.helm_changed }}
+    outputs:
+      helm_changed: ${{ steps.check_changes.outputs.helm_changed }}
 
     steps:
       - name: Checkout code
@@ -47,8 +47,8 @@ jobs:
             echo "helm_changed=false" >> $GITHUB_ENV
             echo "helm_changed=false" >> $GITHUB_OUTPUT
           fi
-        outputs:
-          helm_changed: ${{ steps.check_changes.outputs.helm_changed }} 
+        # outputs:
+        #   helm_changed: ${{ steps.check_changes.outputs.helm_changed }} 
 
       - name: Print Helm Changed Value (Debug)
         run: |
@@ -61,7 +61,7 @@ jobs:
           version: latest
 
       - name: package-helm
-        needs: check_changes
+        needs: Check for Helm Chart Changes
         if: needs.check_changes.outputs.helm_changed == 'true' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
