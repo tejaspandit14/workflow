@@ -53,28 +53,28 @@ jobs:
           echo "Helm changed: ${{ steps.check_changes.outputs.helm_changed }}"
           echo "Helm changed (ENV): ${{ env.helm_changed }}"
 
-  # package-helm:
-  #   needs: check-helm-changes
-  #   if: needs.check-helm-changes.outputs.helm_changed == 'true' && github.ref == 'refs/heads/main'
-  #   runs-on: ubuntu-latest
+  package-helm:
+    needs: check-helm-changes
+    # if: needs.check-helm-changes.outputs.helm_changed == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Install Helm
-  #       uses: azure/setup-helm@v4
-  #       with:
-  #         version: latest
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: latest
 
-  #     - name: Package Helm Chart
-  #       run: |
-  #         mkdir -p packaged
-  #         helm package helm/app -d packaged
-  #         echo "Helm chart packaged successfully!"
+      - name: Package Helm Chart
+        run: |
+          mkdir -p packaged
+          helm package helm/app -d packaged
+          echo "Helm chart packaged successfully!"
 
-  #     - name: Upload Helm Package Artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: helm-chart
-  #         path: packaged/
+      # - name: Upload Helm Package Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: helm-chart
+      #     path: packaged/
