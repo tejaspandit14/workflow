@@ -61,7 +61,7 @@ jobs:
           version: latest
 
       - name: package-helm
-        needs: Check for Helm Chart Changes
+        # needs: Check for Helm Chart Changes
         if: needs.check_changes.outputs.helm_changed == 'true' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
