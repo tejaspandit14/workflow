@@ -1,0 +1,37 @@
+name: PR and Manual Trigger Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select Environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      deploy:
+        description: 'Deploy?'
+        required: true
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run on PR
+        if: github.event_name == 'pull_request'
+        run: echo "Triggered by Pull Request"
+
+      - name: Run on Manual Trigger
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Manual Trigger"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Deploy: ${{ github.event.inputs.deploy }}"
