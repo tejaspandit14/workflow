@@ -11,6 +11,9 @@ jobs:
   start:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
       - name: PR Triggered
         run: echo "Pull Request ${{ github.event.pull_request.number }} started!"
 
