@@ -17,10 +17,10 @@ jobs:
       - name: Request Approval
         run: |
           echo "Waiting for approval..."
-          gh issue comment ${{ github.event.pull_request.number }} \
-            --body "🚀 Deployment pending. Approve by commenting `/approve --env <environment>`"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          gh issue comment "${{ github.event.pull_request.number }}" \
+            --body '🚀 Deployment pending. Approve by commenting `/approve --env <environment>`'
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   wait-for-approval:
     runs-on: ubuntu-latest
