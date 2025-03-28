@@ -12,7 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: PR Triggered
-        run: echo "Pull Request #${{ github.event.pull_request.number }} started!"
+        run: echo "Pull Request ${{ github.event.pull_request.number }} started!"
+
+      - name: Debug Comment Command
+        run: |
+          COMMENT_CMD="gh issue comment \"${{ github.event.pull_request.number }}\" --body '🚀 Deployment pending. Approve by commenting `/approve --env <environment>`'"
+          echo "Running: $COMMENT_CMD"
+          eval $COMMENT_CMD
 
       - name: Request Approval
         run: |
