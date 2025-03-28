@@ -27,7 +27,9 @@ jobs:
 
       - name: Run on PR
         if: github.event_name == 'pull_request'
-        run: echo "Triggered by Pull Request"
+        run: |
+          echo "Triggered by Pull Request"
+          sleep 20
 
       - name: Run on Manual Trigger
         if: github.event_name == 'workflow_dispatch'
