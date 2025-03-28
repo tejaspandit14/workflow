@@ -1,3 +1,13 @@
+name: PR dialog
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
   wait-for-comment:
     runs-on: ubuntu-latest
