@@ -38,7 +38,7 @@ jobs:
 
   continue-if-approved:
     needs: request-approval
-    if: env.USER_DECISION == 'approve'
+    if: ${{ env.USER_DECISION }} == 'approve'
     runs-on: ubuntu-latest
     steps:
       - name: Proceed with next steps
