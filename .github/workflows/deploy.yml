@@ -1,0 +1,19 @@
+name: Deploy Workflow
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select Environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show Input
+        run: echo "Deploying to ${{ github.event.inputs.environment }}"
