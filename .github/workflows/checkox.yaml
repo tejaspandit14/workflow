@@ -1,0 +1,30 @@
+name: Manual Workflow with User Input
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select Environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      deploy:
+        description: 'Deploy?'
+        required: true
+        type: boolean
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display Input
+        run: |
+          echo "Selected Environment: ${{ github.event.inputs.environment }}"
+          echo "Deploy: ${{ github.event.inputs.deploy }}"
+      
+      - name: Deploy to Environment
+        if: github.event.inputs.deploy == 'true'
+        run: |
+          echo "Deploying to ${{ github.event.inputs.environment }}"
