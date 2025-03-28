@@ -1,45 +1,30 @@
-name: PR Dialog Example
+name: Manual Workflow with User Input
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select Environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      deploy:
+        description: 'Deploy?'
+        required: true
+        type: boolean
 
 jobs:
-  request-approval:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Add PR Comment Requesting Input
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Display Input
         run: |
-          gh pr comment ${{ github.event.pull_request.html_url }} \
-          --body "Please approve by commenting `/approve` or reject with `/reject`."
-
-      - name: Wait for User Response
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "Selected Environment: ${{ github.event.inputs.environment }}"
+          echo "Deploy: ${{ github.event.inputs.deploy }}"
+      
+      - name: Deploy to Environment
+        if: github.event.inputs.deploy == 'true'
         run: |
-          while true; do
-            RESPONSE=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments --jq '.[].body' | grep -E '/approve|/reject' || true)
-            if [[ "$RESPONSE" == *"/approve"* ]]; then
-              echo "User approved! Proceeding..."
-              echo "USER_DECISION=approve" >> $GITHUB_ENV
-              break
-            elif [[ "$RESPONSE" == *"/reject"* ]]; then
-              echo "User rejected! Exiting..."
-              echo "USER_DECISION=reject" >> $GITHUB_ENV
-              exit 1
-            fi
-            echo "Waiting for user response..."
-            sleep 10
-          done
-
-  # continue-if-approved:
-  #   needs: request-approval
-  #   if: ${{ env.USER_DECISION }} == 'approve'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Proceed with next steps
-  #       run: echo "Continuing with the workflow..."
+          echo "Deploying to ${{ github.event.inputs.environment }}"
