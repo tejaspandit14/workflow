@@ -1,34 +1,45 @@
-name: PR dialog
-
+name: PR Dialog Example
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+    types: [opened, synchronize, reopened]
 
 jobs:
-  wait-for-comment:
+  request-approval:
     runs-on: ubuntu-latest
     steps:
-      - name: Request User Approval
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Add PR Comment Requesting Input
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr comment ${{ github.event.pull_request.html_url }} \
-          --body "Please approve the build by commenting `/approve-build`."
+          --body "Please approve by commenting `/approve` or reject with `/reject`."
 
       - name: Wait for User Response
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           while true; do
-            RESPONSE=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments --jq '.[].body' | grep "/approve-build" || true)
-            if [[ "$RESPONSE" != "" ]]; then
-              echo "Build approved!"
+            RESPONSE=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments --jq '.[].body' | grep -E '/approve|/reject' || true)
+            if [[ "$RESPONSE" == *"/approve"* ]]; then
+              echo "User approved! Proceeding..."
+              echo "USER_DECISION=approve" >> $GITHUB_ENV
               break
+            elif [[ "$RESPONSE" == *"/reject"* ]]; then
+              echo "User rejected! Exiting..."
+              echo "USER_DECISION=reject" >> $GITHUB_ENV
+              exit 1
             fi
-            echo "Waiting for approval..."
+            echo "Waiting for user response..."
             sleep 10
           done
+
+  continue-if-approved:
+    needs: request-approval
+    if: env.USER_DECISION == 'approve'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Proceed with next steps
+        run: echo "Continuing with the workflow..."
